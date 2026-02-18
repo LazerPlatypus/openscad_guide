@@ -1,0 +1,37 @@
+# ============================================================
+# .gitignore for OpenSCAD Design Projects
+# ============================================================
+
+# Build artifacts (regenerate with `make`)
+build/
+
+# OpenSCAD temp files
+*.gch
+*.bak
+.scad-deps
+
+# Python virtual environment (from make setup)
+venv/
+.venv/
+*.pyc
+__pycache__/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*~
+.vscode/
+.idea/
+*.code-workspace
+
+# Backup files
+*.backup
+*_backup
+*.old
+
+# Documentation (optional - can commit generated docs if desired)
+# docs/api/
