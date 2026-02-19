@@ -32,7 +32,8 @@ mkdir -p "$DOCS_DIR"
 IFS=',' read -ra DIR_LIST <<< "$DIRS"
 for dir in "${DIR_LIST[@]}"; do
     if [ -d "$dir" ]; then
-        mapfile -t scad_files < <(find "$dir" -name "*.scad")
+        scad_files=()
+        while IFS= read -r -d '' f; do scad_files+=("$f"); done < <(find "$dir" -name "*.scad" -print0)
         if [ ${#scad_files[@]} -gt 0 ]; then
             $DOCSGEN -m "${scad_files[@]}" --force
         fi
