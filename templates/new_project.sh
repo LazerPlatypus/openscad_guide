@@ -138,7 +138,7 @@ replace_in_file() {
 }
 
 # Find all files and replace placeholders
-find "$DEST_DIR" -type f \( -name "*.scad" -o -name "*.md" -o -name "Makefile" -o -name ".*" \) -not -path "*/build/*" -not -path "*/.git/*" | while read -r file; do
+find "$DEST_DIR" -type f \( -name "*.scad" -o -name "*.md" -o -name "Makefile" -o -name ".*" \) -not -path "*/build/*" -not -path "*/.git/*" -not -path "*/.venv/*" -not -path "*/deps/*" | while read -r file; do
     replace_in_file "$file" '\[PROJECT\]' "$PROJECT_NAME"
     replace_in_file "$file" '\[PROJECT_NAME\]' "$PROJECT_NAME"
     replace_in_file "$file" '\[DESCRIPTION\]' "$DESCRIPTION"
