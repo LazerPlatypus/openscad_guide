@@ -1,6 +1,6 @@
 # File Organization - Quick Reference
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-02-19
 **Status:** Draft
 **Why this structure?** See [Explanation](../explanation/why_these_conventions.md#file-organization)
 
@@ -8,282 +8,147 @@
 
 ## Standard File Template
 
-Every `.scad` file follows this structure:
-
 ```scad
-// File: filename.scad
+// File: parts/example_part.scad
 // Description:
-//   Brief file description.
+//   One-line purpose statement.
+// Includes:
+//   use <parts/example_part.scad>
 
-// ============================================================
-// IMPORTS
-// ============================================================
+use <../deps/coord_kit/core.scad>;
+include <../config.scad>;
 
-include <dependency1.scad>
-use <dependency2.scad>
+EXAMPLE_CONST = 10;
 
-// ============================================================
-// CONSTANTS
-// ============================================================
-
-CONSTANT_NAME = value;
-
-// ============================================================
-// PUBLIC FUNCTIONS
-// ============================================================
-
-// Function: public_function()
+// Function: calculate_value
 // Usage:
-//   result = public_function(arg);
+//   calculate_value(input);
 // Description:
-//   What this function does.
+//   Computes a derived value.
 // Arguments:
-//   arg = Description. Default: value
+//   input = Numeric input.
 // Example:
-//   result = public_function(10);
-function public_function() = ...;
+//   calculate_value(10);
+function calculate_value(input) = input + EXAMPLE_CONST;
 
-// ============================================================
-// PUBLIC MODULES
-// ============================================================
-
-// Module: public_module()
+// Module: example_part
 // Usage:
-//   public_module();
+//   example_part();
 // Description:
-//   What this module creates.
-// Arguments:
-//   ---
-//   param = Description. Default: value
-// Example:
-//   public_module();
-module public_module() { ... }
+//   Creates example part geometry.
+// Example(3D,Render):
+//   example_part();
+module example_part() {
+    cube([10, 10, 10]);
+}
 
-// ============================================================
-// PRIVATE HELPERS
-// ============================================================
-
-// Function: _private_function()
+// Function: _internal_helper
 // Status: INTERNAL
 // Usage:
-//   result = _private_function(arg);
+//   _internal_helper(v);
 // Description:
-//   Internal helper for validation.
+//   Internal helper.
 // Arguments:
-//   arg = Description
-function _private_function() = ...;
-```
+//   v = Value to normalize.
+function _internal_helper(v) = max(v, 0);
 
-**Notes:**
-- Public functions and modules come before private helpers
-- Examples and tests belong in separate `examples/` and `tests/` directories, not in source files
-- Keep functions and modules in separate sections for clarity
+example_part();
+```
 
 ---
 
-## Section Details
+## Ordering Guidelines
 
-### 1. File Header
-- `// File:` or `// LibFile:` block
-- Description of file purpose
-- Dependencies list (if any)
+Preferred top-to-bottom order:
 
-### 2. Imports
-- `include` for full file inclusion
-- `use` for modules/functions only
-- Group: external libraries, local files, utilities
+1. File header (`File`/`LibFile`, `Description`, `Includes`)
+2. Imports (`use`/`include`)
+3. Constants
+4. Public functions
+5. Public modules
+6. Private helpers (`_`-prefixed)
+7. Default render call
 
-### 3. Constants
-- All `SCREAMING_SNAKE_CASE` constants
-- Grouped by purpose
-- Commented with units/rationale
+Public API stays above internal implementation details.
 
-### 4. Public Functions
-- All exported functions
-- Full documentation blocks
-- Kept separate from modules for clarity
-- Ordered logically (most-used first or by dependency)
+---
 
-### 5. Public Modules
-- All exported modules
-- Full documentation blocks
-- Kept separate from functions for clarity
-- Ordered logically
+## `Includes:` Guidance
 
-### 6. Private Helpers
-- All `_prefixed` internal functions/modules
-- Full documentation with `Status: INTERNAL`
-- Placed at end so public API is visible first
-- Ordered by dependency
+### Required behavior
+- First `Includes:` entry should show project-root import path for this file.
+- Use `use <...>` for module/function consumers by default.
+
+### Example-level additions
+- If an individual `Example` block needs more context, add additional `use`/`include` lines in that example block.
+- Do not overload top-level `Includes:` with every possible transitive dependency.
+
+---
+
+## Examples in Source
+
+Examples in source doc blocks are preferred.
+
+- Keep examples short and realistic.
+- Use `Example(2D)` / `Example(3D,Render)` where it improves clarity.
+- Put extended tutorials in separate example files; keep API usage examples in source docs.
+
+---
+
+## Render Behavior
+
+Project files should render unconditionally when opened directly in OpenSCAD.
+
+- Add a default render call at file end for direct visual feedback.
+- Use `config.scad` for quality/export flags (`EXPORT_MODE`, `PREVIEW_FN`, `EXPORT_FN`, `$fn`).
+- Avoid patterns that open to a blank viewport by default.
 
 ---
 
 ## Formatting Rules
 
-### Indentation
-- **4 spaces** (not tabs)
-- Consistent throughout file
-
-### Blank Lines
-- 1 blank line between items in same section
-- 2 blank lines between major sections
-
-### Line Length
-- Prefer under 100 characters
-- Break long lines at logical points
-
-### Operator Spacing
-- Always spaces around operators: `x = a + b`
-- Space after commas: `[0, 0]`
-- No space after `(` or before `)`: `function(arg1, arg2)`
+- **Indentation:** 4 spaces
+- **Line length:** prefer under 100 chars
+- **Operators:** spaces around operators (`x = a + b`)
+- **Commas:** space after comma (`[0, 0]`)
+- **Blank lines:** 1 between related items, 2 between major sections
 
 ---
 
-## File Size Guidelines
+## Common File Types (Project)
 
-**When to split a file:**
-- File has multiple distinct responsibilities (most important criterion)
-- Reusable components can be extracted
-- Testing would benefit from isolation
-- File organization becomes unclear
+### `parts/*.scad`
+- Printable geometry modules.
+- Export targets for STL generation.
 
-**About file length:**
-- Long files (500+ lines) are acceptable if they have a single, clear responsibility
-- Some complex modules/functions naturally require many lines
-- Focus on responsibility, not arbitrary line counts
-- If a file is long, ensure it's well-organized with clear sections
+### `assemblies/*.scad`
+- Combined setups for fit checks and docs renders.
+- Usually image targets, not STL targets.
 
-**How to split:**
-```
-Before:
-  shapes.scad (800 lines)
+### `tools/*.scad`
+- Reusable helper modules used by `parts`.
+- Often not directly printable final models.
 
-After:
-  shapes/
-    circles.scad
-    rectangles.scad
-    polygons.scad
-    public.scad  (includes all)
-```
-
----
-
-## include vs use
-
-**`include <file.scad>`:**
-- Brings in everything (like copy-paste)
-- Includes constants and expressions
-- Use when you need constants or want code to run
-
-**`use <file.scad>`:**
-- Imports only modules and functions
-- Doesn't include constants or run code
-- Use when you only need functions/modules
-
-**Example:**
-```scad
-include <consts.scad>           // Need the constants
-use <geometry_helpers.scad>     // Only need the functions
-```
-
----
-
-## Project vs Library Files
-
-### Library Files (for reuse)
-- More documentation
-- More validation/assertions
-- Broader parameter ranges
-- Public API focus
-- Examples section
-
-### Project Files (for specific design)
-- Focused on specific use case
-- Optimized for project needs
-- May have tighter constraints
-- Can be less general
-
----
-
-## Common File Types
-
-### Core library file
-```scad
-// LibFile: core.scad
-// Description:
-//   Main entry point, includes all library modules.
-
-include <constants.scad>
-include <geometry/circles.scad>
-include <geometry/polygons.scad>
-```
-
-### Constants file
-```scad
-// File: consts.scad
-// Description:
-//   Shared constants for project.
-
-HOCKEY_PUCK_DIAMETER = 76.3;
-HOCKEY_PUCK_HEIGHT = 25.4;
-```
-
-### Part file
-```scad
-// File: base_plate.scad
-// Description:
-//   Base plate for display assembly.
-
-include <../config.scad>
-include <consts.scad>
-
-module base_plate() { ... }
-
-// Render when opened directly
-base_plate();
-```
-
-### Preview file
-```scad
-// File: preview_assembly.scad
-// Description:
-//   Full assembly preview for development.
-
-use <../models/part_one.scad>
-use <../models/part_two.scad>
-
-$fn = 16;  // Fast preview
-
-part_one();
-translate([50, 0, 0])
-    part_two();
-```
+### `hardware/*.scad`
+- Hardware references and supporting helpers.
 
 ---
 
 ## Quick Checklist
 
-Before committing a file:
-
-- [ ] File header present
-- [ ] Imports grouped logically
-- [ ] Constants in `SCREAMING_SNAKE_CASE`
-- [ ] Private items prefixed with `_`
-- [ ] Sections in standard order (public before private)
-- [ ] Functions and modules in separate sections
-- [ ] Public items fully documented
-- [ ] Private items documented with `Status: INTERNAL`
-- [ ] 4-space indentation
-- [ ] Lines under 100 characters
-- [ ] Spaces around operators
-- [ ] No examples in source files (use `examples/` directory)
-- [ ] No commented-out old code
+- [ ] Header includes `File`/`LibFile`, `Description`, `Includes`
+- [ ] `Includes` starts with project-root `use <...>` path for the file itself
+- [ ] Public items are above private helpers
+- [ ] Private helpers use `_` prefix and `Status: INTERNAL`
+- [ ] `Arguments` block appears only when arguments exist
+- [ ] Source doc examples are present (strongly recommended)
+- [ ] File renders unconditionally when opened directly
+- [ ] Formatting remains consistent (4-space indent, spacing, line length)
 
 ---
 
 ## Next Steps
 
-- See [Naming Reference](naming.md) for naming conventions
-- See [Documentation Reference](documentation.md) for documenting your code
-- See [Project Structure](../how_to/create_project.md) *(coming soon)* for full project organization
-- See [Library Structure](../how_to/create_library.md) *(coming soon)* for library organization
+- See [Documentation Reference](documentation.md) for block-level docs requirements
+- See [Project Structure](project_structure.md) for directory and workflow conventions
+- See [Naming Reference](naming.md) for naming patterns

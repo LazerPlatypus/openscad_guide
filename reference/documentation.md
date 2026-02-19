@@ -1,326 +1,204 @@
 # Documentation Format - Quick Reference
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-02-19
 **Status:** Draft
 **Tool:** [openscad_docsgen](https://github.com/BelfrySCAD/openscad_docsgen)
 **Full Reference:** [WRITING_DOCS.md](https://github.com/BelfrySCAD/openscad_docsgen/blob/main/WRITING_DOCS.md)
 
 ---
 
-## Basic Format
+## Core Rules
 
-All documentation uses openscad_docsgen comment block format:
-
-```scad
-// BlockName: identifier
-//   Body line 1
-//   Body line 2
-```
-
-**Key rules:**
-- Block names start with capital letter + colon
-- Body lines indented with `//` + 3 spaces
-- Use `.` on its own line for paragraph breaks
+- Keep documentation in source files, next to implementation.
+- Prefer practical completeness over rigid boilerplate.
+- Include examples in doc blocks whenever possible.
+- Use `Status: INTERNAL` for private items.
 
 ---
 
 ## File Header
 
-**Every file must start with:**
+Every `.scad` file starts with:
 
 ```scad
 // File: filename.scad
 // Description:
 //   Brief description of file purpose.
-//   What it provides.
 // Includes:
-//   include <path/to/filename.scad>
+//   use <path/to/filename.scad>
 ```
 
-**Important:** The `Includes:` block must show the relative path from the project root. This is required for openscad_docsgen to properly generate images from examples.
+For libraries, `LibFile:` is also valid.
 
-**For libraries:**
+### `Includes:` usage
+
+- First line should show how users import this file from project root.
+- Prefer `use <...>` for modules/functions.
+- Add extra `include`/`use` lines in individual examples only when needed by that example.
+
+Example:
 
 ```scad
-// LibFile: geometry/circles.scad
+// File: parts/bracket.scad
 // Description:
-//   Circle and arc generation functions.
+//   Bracket geometry.
 // Includes:
-//   include <library_name/src/geometry/circles.scad>
+//   use <parts/bracket.scad>
 ```
-
-**Example with dependencies:**
-
-```scad
-// File: models/bracket.scad
-// Description:
-//   Mounting bracket creation.
-// Includes:
-//   include <project_name/models/bracket.scad>
-//   include <BOSL2/std.scad>
-//   include <../lib/helpers.scad>
-```
-
-**Note:** Always include the path to the file itself first, then external dependencies
 
 ---
 
-## Function Documentation
+## Public Item Requirements
 
-**Required blocks:**
-- `Function:` - Name with parentheses
-- `Usage:` - Common calling patterns
-- `Description:` - What it does
-- `Arguments:` - All parameters
-- `Example:` - At least one example
+### Required blocks (all public functions/modules)
+- Header (`Function:` or `Module:`)
+- `Description:`
+- `Usage:`
 
-**Template:**
+### Conditional requirement
+- `Arguments:` is required when the item takes arguments.
+- `Arguments:` must be omitted when the item takes no arguments.
+
+### Strong recommendation
+- `Example:` is strongly recommended for all public items.
+- For geometry-producing modules, examples should be treated as standard practice.
+
+---
+
+## Function Template
+
+With arguments:
 
 ```scad
-// Function: function_name()
+// Function: calculate_radius
 // Usage:
-//   result = function_name(param1);
-//   result = function_name(param1, param2);
+//   radius = calculate_radius(diameter);
 // Description:
-//   What this function does.
-//   Additional details.
+//   Calculates radius from diameter.
 // Arguments:
-//   param1 = Description. Units. Constraints.
-//   param2 = Description. Default: value
-//   ---
-//   optional_param = Description. Default: value
+//   diameter = Diameter value. Must be positive.
 // Example:
-//   result = function_name(10);  // Returns ...
+//   calculate_radius(10);  // 5
+function calculate_radius(diameter) = diameter / 2;
 ```
 
-**Key points:**
-- Use `---` to separate positional arguments from named arguments
-- Positional arguments appear before `---` and must be provided in order
-- Named arguments appear after `---` and can be provided in any order with `name=value`
-- Always specify defaults for named arguments
-- Include units and constraints
-- Provide concrete examples
-
----
-
-## Module Documentation
-
-**Required blocks:**
-- `Module:` - Name with parentheses
-- `Usage:` - Common calling patterns
-- `Description:` - What it creates
-- `Arguments:` - All parameters
-- `Example:` - At least one example
-
-**Template:**
+Without arguments:
 
 ```scad
-// Module: module_name()
+// Function: default_segments
 // Usage:
-//   module_name();
-//   module_name(param1, param2);
-//   module_name(param1) { children }
+//   default_segments();
 // Description:
-//   Creates geometry description.
-//   Positioning and orientation details.
+//   Returns the default segment count.
+// Example:
+//   default_segments();
+function default_segments() = 32;
+```
+
+---
+
+## Module Template
+
+With arguments:
+
+```scad
+// Module: puck
+// Usage:
+//   puck(diameter=76.3, height=25.4);
+// Description:
+//   Creates a puck body.
 // Arguments:
-//   param1 = Description. Units. Default: value
-//   ---
-//   param2 = Description. Default: value
-// Example:
-//   module_name();
-// Example: Custom size
-//   module_name(width=100, height=60);
+//   diameter = Diameter in mm. Default: 76.3
+//   height = Height in mm. Default: 25.4
+// Example(3D,Render):
+//   puck();
+module puck(diameter=76.3, height=25.4) {
+    cylinder(d=diameter, h=height);
+}
 ```
 
----
-
-## Constants Documentation
-
-**Simple constants:**
+Without arguments:
 
 ```scad
-// Constant: CONSTANT_NAME
+// Module: bolt_preview
+// Usage:
+//   bolt_preview();
 // Description:
-//   What this constant represents.
-//   Why this specific value.
-CONSTANT_NAME = value;
-```
-
-**Grouped constants:**
-
-```scad
-// ============================================================
-// CONSTANTS - Group Description
-// ============================================================
-// Overall group explanation if needed
-
-CONSTANT_ONE = value;   // Inline comment
-CONSTANT_TWO = value;   // Inline comment
+//   Renders a fixed bolt preview.
+// Example(3D,Render):
+//   bolt_preview();
+module bolt_preview() {
+    // ...
+}
 ```
 
 ---
 
-## Examples
+## Examples in Source Files
 
-**Simple example:**
+Examples in doc comment blocks are preferred.
 
-```scad
-// Example:
-//   hockey_puck();
-```
+- They improve generated documentation quality.
+- They support docs image generation.
+- They remain versioned with implementation changes.
 
-**Named example:**
-
-```scad
-// Example: Large puck
-//   hockey_puck(diameter=80);
-```
-
-**2D example:**
-
-```scad
-// Example(2D):
-//   polygon(make_circle_points(10));
-```
-
-**Example with setup:**
-
-```scad
-// Example:
-//   $fn = 64;
-//   difference() {
-//       hockey_puck();
-//       cylinder(d=20, h=30, center=true);
-//   }
-```
+Supported patterns include:
+- `Example:`
+- `Example(2D):`
+- `Example(3D,Render):`
 
 ---
 
-## Special Sections
+## Private Items
 
-**Status:**
-
-```scad
-// Function: old_function()
-// Status: DEPRECATED, use `new_function()` instead
-```
+Private functions/modules should still be documented for maintainability.
 
 ```scad
-// Function: experimental_feature()
-// Status: EXPERIMENTAL - API may change
-```
-
-**Topics:**
-
-```scad
-// Function: make_bracket()
-// Topics: Geometry, Hardware, Mounting
-```
-
-**See Also:**
-
-```scad
-// Function: make_circle_points()
-// See Also: make_arc_points(), make_ellipse_points()
-```
-
----
-
-## Private vs Public
-
-**Public items:** Full documentation (all blocks required)
-
-**Private items:** Full documentation with `Status: INTERNAL`
-
-```scad
-// Function: _validate_plane()
+// Function: _validate_plane
 // Status: INTERNAL
 // Usage:
-//   valid = _validate_plane(plane);
+//   _validate_plane(plane);
 // Description:
-//   Internal helper to validate plane parameter.
-//   Returns true if valid, raises assertion if invalid.
+//   Validates plane parameter and raises on invalid values.
 // Arguments:
-//   plane = Plane identifier to validate
+//   plane = Plane identifier.
 function _validate_plane(plane) =
-    assert(in_list(plane, VALID_PLANES), str("Invalid plane: ", plane))
+    assert(in_list(plane, ["XY", "XZ", "YZ"]))
     true;
 ```
-
-**Why full documentation for private items:**
-- Helps maintainers understand internal code
-- Facilitates debugging and refactoring
-- `Status: INTERNAL` signals it's not public API
-- Can be filtered out of public documentation generation
-
----
-
-## Inline Comments
-
-**When to use:**
-- Complex mathematical operations
-- Non-obvious algorithms
-- Workarounds
-- Performance optimizations
-
-**Example:**
-
-```scad
-let (
-    // Calculate centroid by averaging all points
-    centroid = [
-        sum([for (p = points) p.x]) / len(points),
-        sum([for (p = points) p.y]) / len(points)
-    ],
-
-    // Translate relative to centroid for center rotation
-    centered = [for (p = points) p - centroid]
-)
-```
-
-**When NOT to use:**
-- Obvious operations
-- Repeating what code shows
-- Compensating for bad naming
-
----
-
-## Quick Checklist
-
-Before committing:
-
-- [ ] File has `// File:` or `// LibFile:` header with `Includes:` block
-- [ ] `Includes:` shows relative path from project root
-- [ ] All public functions have `// Function:` blocks
-- [ ] All public modules have `// Module:` blocks
-- [ ] All private items have full docs with `Status: INTERNAL`
-- [ ] Each has `Usage:`, `Description:`, `Arguments:`, `Example:`
-- [ ] Examples show actual usage, not just syntax
-- [ ] `---` used correctly to separate positional from named arguments
-- [ ] Constants have explanatory comments
-- [ ] Complex logic has inline comments
-- [ ] No `Aliases:` blocks (one name per function)
 
 ---
 
 ## Configuration
 
-**Setup in `.openscad_docsgen_rc`:**
+Baseline `.openscad_docsgen_rc`:
 
 ```plaintext
 DocsDirectory: docs/api
-TargetProfile: githubwiki
+TargetProfile: wiki
 ProjectName: Your Project
-GeneratedDocs: Files, ToC, Index, Topics, CheatSheet
+GenerateDocs: Files, ToC, Index, Topics, CheatSheet
 ```
 
-See [How to Set Up openscad_docsgen](../how_to/setup_openscad_docsgen.md) *(coming soon)*
+Why `wiki`?
+- Better compatibility with VS Code markdown visualization.
+
+---
+
+## Quick Checklist
+
+- [ ] File header includes `File`/`LibFile`, `Description`, and `Includes`
+- [ ] Public items include header + `Description` + `Usage`
+- [ ] `Arguments` present only when arguments exist
+- [ ] `Example` blocks included wherever practical (strongly recommended)
+- [ ] Private items include `Status: INTERNAL`
+- [ ] `.openscad_docsgen_rc` uses `TargetProfile: wiki`
+- [ ] `.openscad_docsgen_rc` uses `GenerateDocs` (not `GeneratedDocs`)
 
 ---
 
 ## Next Steps
 
-- See [Naming Reference](naming.md) for naming your documented items
-- See [File Organization](file_organization.md) for structuring documented files
+- See [File Organization](file_organization.md) for placement and ordering
+- See [Project Structure](project_structure.md) for folder/workflow conventions
 - See [Why These Conventions](../explanation/why_these_conventions.md#documentation) for rationale

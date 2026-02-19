@@ -8,98 +8,87 @@ Opinionated conventions for writing maintainable OpenSCAD code.
 
 **New to this guide?**
 - Start with [Naming Reference](reference/naming.md)
-- Then see [File Organization](reference/file_organization.md)
-- Print the [Cheatsheet](reference/cheatsheet.md) for your desk
+- Then read [Project Structure](reference/project_structure.md)
+- Then read [File Organization](reference/file_organization.md)
+- Keep [Cheatsheet](reference/cheatsheet.md) open while coding
 
-**Setting up a new project?**
-- See [How to Create a Project](how_to/create_project.md) *(coming soon)*
-
-**Setting up a new library?**
-- See [How to Create a Library](how_to/create_library.md) *(coming soon)*
-
-**Want to understand why?**
+**Want the reasoning?**
 - Read [Why These Conventions](explanation/why_these_conventions.md)
+
+---
+
+## What This Guide Standardizes
+
+- Naming conventions (`snake_case`, `SCREAMING_SNAKE_CASE`, `_private_items`)
+- Canonical physical-project layout:
+  - `parts/`
+  - `assemblies/`
+  - `tools/`
+  - `hardware/`
+- Script-first build workflow (`make` orchestrates, scripts implement)
+- In-source docs with openscad_docsgen
+- Practical docs requirements (required minimum + recommended examples)
+- Runtime config pattern (`EXPORT_MODE`, preview/export `$fn`)
 
 ---
 
 ## Guide Structure
 
-This guide follows the [Diataxis](https://diataxis.fr) framework:
+- **[Reference](reference/)** - Quick lookup
+  - [Naming](reference/naming.md)
+  - [Documentation Format](reference/documentation.md)
+  - [File Organization](reference/file_organization.md)
+  - [Project Structure](reference/project_structure.md)
+  - [Cheatsheet](reference/cheatsheet.md)
 
-- **[Reference](reference/)** - Quick lookup when you need an answer
-  - Naming conventions
-  - Documentation format
-  - File organization patterns
-  - Project structure
-  - One-page cheatsheet
+- **[Explanation](explanation/)** - Rationale and trade-offs
+  - [Why These Conventions](explanation/why_these_conventions.md)
 
-- **[Explanation](explanation/)** - Understanding the reasoning
-  - Why these conventions?
-  - Design philosophy
-  - Trade-offs and alternatives
-
-- **[How-To Guides](how_to/)** *(coming soon)* - Step-by-step task completion
-  - Setting up openscad_docsgen
-  - Creating a new library
-  - Creating a new project
-  - Organizing large projects
-
-- **[Tutorials](tutorials/)** *(coming soon)* - Learning by doing
-  - Your first library
-  - Your first project
-
-- **[Templates](templates/)** *(coming soon)* - Starter code
-  - Library template
-  - Project template
-  - File templates
+- **[Templates](templates/)** - Starter structures
+  - [Templates README](templates/README.md)
+  - `blank_project/`
+  - `blank_library/`
 
 ---
 
 ## At a Glance
 
 ```scad
-// Constants - SCREAMING_SNAKE_CASE
-HOCKEY_PUCK_DIAMETER = 76.3;
-DEFAULT_SEGMENTS = 32;
+// Global render controls
+PREVIEW_FN = 32;
+EXPORT_FN = 128;
+EXPORT_MODE = false;
+$fn = EXPORT_MODE ? EXPORT_FN : PREVIEW_FN;
 
-// Variables, functions, modules - snake_case
-radius = 10;
-function calculate_area(r) = PI * r * r;
-module hockey_puck() { ... }
+// Public API docs minimum
+// Module: toe_clamp_body
+// Usage:
+//   toe_clamp_body();
+// Description:
+//   Creates the toe clamp body.
+// Example(3D,Render):
+//   toe_clamp_body();
+module toe_clamp_body() { ... }
 
-// Private items - prefix with _
-function _internal_helper() = ...;
-module _debug_render() { ... }
+// Internal helper
+// Function: _validate_dims
+// Status: INTERNAL
+function _validate_dims() = ...;
 ```
-
-See the [Cheatsheet](reference/cheatsheet.md) for more.
 
 ---
 
-## Using This Guide
+## Current Status
 
-### As a Quick Reference
-Jump directly to [Reference](reference/) when you need to look something up.
-
-### As a Learning Tool
-Start with [Explanation](explanation/) to understand the philosophy, then work through examples.
-
-### For a New Project
-Use the [Templates](templates/) and follow the [How-To Guides](how_to/) *(coming soon)*.
+**Status:** Active draft (aligned to current project conventions)  
+**Last Updated:** 2026-02-19
 
 ---
 
 ## Contributing
 
-This is a living document.
+This guide is a living document.
 
-**Found something confusing?** Open an issue or submit a clarification.
-
-**Have a better example?** Submit a PR.
-
-**Disagree with a convention?** Start a discussion with rationale.
-
----
-
-**Status:** Early draft - Reference and Explanation sections in progress
-**Last Updated:** 2026-02-15
+- Found ambiguity? Propose a clarification.
+- Found mismatch with active projects? Open an issue with examples.
+- Proposing a convention change? Include rationale and trade-offs.
