@@ -1,0 +1,15 @@
+# ============================================================
+# .gitignore for OpenSCAD Design Projects
+# ============================================================
+
+# Build artifacts (regenerate with `make`)
+build/
+
+# Python virtual environment (from make setup)
+venv/
+.venv/
+*.pyc
+__pycache__/
+
+# openscad-docsgen cache file
+.source_hashes

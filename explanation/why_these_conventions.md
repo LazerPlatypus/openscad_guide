@@ -1,6 +1,6 @@
 # Why These Conventions?
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-02-19
 **Status:** Draft
 
 Understanding the reasoning behind our style guide choices.
@@ -79,17 +79,17 @@ radius = HOCKEY_PUCK_DIAMETER / 2;
 - Signals "use at your own risk"
 - Common convention (Python, JavaScript, Go)
 
-**Documentation separation:**
-- Private items don't need full documentation
-- Generators can skip `_` items
-- Cleaner public API docs
+**Documentation boundaries:**
+- Private items are still documented for maintainers
+- `Status: INTERNAL` clearly marks non-public API
+- Public docs can still filter internal items when needed
 
 **Example:**
 ```scad
 // Public - documented, stable
 function calculate_area(radius) = ...;
 
-// Private - undocumented, can change
+// Private - documented INTERNAL item, can change
 function _validate_radius(r) = ...;
 ```
 
@@ -171,6 +171,11 @@ function _validate_radius(r) = ...;
 - Documentation becomes executable
 - openscad_docsgen can generate images from examples
 
+**Project reality:**
+- Examples in source doc blocks are preferred
+- This keeps usage, rendering context, and implementation together
+- This is the most reliable way to generate useful docs images with openscad_docsgen
+
 **Example:**
 ```scad
 // Without example - unclear usage
@@ -201,8 +206,30 @@ function _validate_radius(r) = ...;
 ```scad
 // File: geometry/circles.scad
 // Includes:
-//   include <mylib/src/geometry/circles.scad>
+//   use <mylib/src/geometry/circles.scad>
 ```
+
+**Rule of thumb:**
+- The first line in `Includes:` should show how users import this file from project root.
+- Use `use <...>` for files consumed as modules/functions.
+- Add additional `include`/`use` lines inside specific examples when those examples need extra context.
+
+### Why Require a Practical Minimum Documentation Block?
+
+We optimize for consistency without forcing unnecessary boilerplate.
+
+**Required for public items:**
+- Header (`Function:` or `Module:`)
+- `Description:`
+- `Usage:`
+
+**Arguments block rule:**
+- `Arguments:` is required when the function/module takes arguments
+- `Arguments:` must be omitted when there are no arguments (avoids docs formatting issues)
+
+**Examples:**
+- `Example:` is strongly recommended for all public items
+- In practice, examples are considered essential for geometry-producing modules
 
 ### Why Document Private Items Fully?
 
@@ -278,22 +305,21 @@ function _validate_radius(r) = ...;
 - Modules can be ordered by usage
 - Different types have different ordering logic
 
-### Why No Examples in Source Files?
+### Why Keep Examples in Source Files?
 
-**Separation of concerns:**
-- Source files define functionality
-- Example files demonstrate usage
-- Tests validate correctness
+**Docs as close to code as possible:**
+- The best example is next to the thing it documents
+- Examples in comment blocks are versioned and reviewed with implementation changes
+- Users can copy working snippets directly from generated docs
 
-**File cleanliness:**
-- Examples add noise to source
-- Hard to find actual implementation
-- Commented-out code is a maintenance burden
+**Image generation quality:**
+- openscad_docsgen can render these examples directly
+- 2D/3D/render-targeted examples are explicit and reproducible
+- Examples become living smoke tests for common usage paths
 
-**Better organization:**
-- `examples/` directory for demonstrations
-- `tests/` directory for validation
-- Source files stay focused
+**Balance:**
+- Keep examples concise and scoped to the documented item
+- Use dedicated `examples/` directories for larger walkthroughs, not for basic API usage
 
 ### Why 4-Space Indentation?
 
@@ -329,6 +355,21 @@ function _validate_radius(r) = ...;
 ---
 
 ## Project Structure {#project-structure}
+
+### Why Domain-Based Project Layout?
+
+For physical design projects, explicit domain folders are easier to navigate than generic buckets.
+
+**Preferred structure:**
+- `parts/` - printable geometry intended for STL export
+- `assemblies/` - composed views for fit checks, docs images, and assembly communication
+- `tools/` - reusable building modules used by `parts/` (often not directly printable)
+- `hardware/` - reference hardware models and helper geometry
+
+**Why this works:**
+- Intent is obvious from file location
+- Build/export scripts can target only printable parts
+- Documentation generation can include all design surfaces (`parts`, `assemblies`, `tools`, `hardware`)
 
 ### Why Makefile?
 
@@ -370,7 +411,8 @@ function _validate_radius(r) = ...;
 
 **Project-specific settings:**
 - Controls which files to document
-- Sets processing order (PriorityPrefix)
+- Uses `TargetProfile: wiki` for better VS Code markdown compatibility
+- Uses `GenerateDocs` to define outputs (Files, ToC, Index, Topics, CheatSheet)
 - Configures output directory
 - Automatically used by `make docs`
 
@@ -427,7 +469,7 @@ function _validate_radius(r) = ...;
 - Leads to merge conflicts
 
 **Clear separation:**
-- `src/` and `models/` are source of truth
+- source directories (such as `parts/`, `assemblies/`, `tools/`, `hardware/`) are source of truth
 - `build/` is derived output
 - Can delete build/ and recreate anytime
 
@@ -482,6 +524,7 @@ function _validate_radius(r) = ...;
 - Design is the goal, not reusability
 - Parameters are tuned to your needs
 - You'll export STL files
+- You want domain folders like `parts/`, `assemblies/`, `tools/`, `hardware/`
 
 **Use library structure when:**
 - Creating reusable functions/modules
@@ -497,6 +540,28 @@ function _validate_radius(r) = ...;
 ---
 
 ## Design Principles
+
+### Why Unconditional Rendering in Project Files?
+
+**Direct OpenSCAD feedback loop:**
+- Opening a file in the OpenSCAD UI should immediately show geometry
+- This shortens iteration time and reduces confusion during development
+- It avoids "blank preview" states when users open individual files
+
+**Practical rule:**
+- Project files should render unconditionally when opened directly
+- Export-specific behavior can still be controlled through config flags (`EXPORT_MODE`, `$fn` switching)
+
+### Why Document a Minimum OpenSCAD Version?
+
+**Toolchain clarity:**
+- OpenSCAD snapshot behavior changes over time
+- Documenting a minimum version prevents ambiguous build failures
+- Projects should state their current minimum based on the features they use
+
+**Practical policy:**
+- The guide recommends declaring a minimum OpenSCAD version in project README
+- Teams should update that version as features/tooling evolve
 
 ### Inspired by Go
 

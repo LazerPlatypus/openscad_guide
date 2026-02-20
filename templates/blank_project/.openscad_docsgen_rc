@@ -1,0 +1,30 @@
+# ============================================================
+# OpenSCAD Documentation Generation Configuration
+# ============================================================
+# Configuration file for openscad_docsgen
+# See: https://github.com/BelfrySCAD/openscad_docsgen
+
+# ============================================================
+# OUTPUT SETTINGS
+# ============================================================
+
+# Output directory for generated documentation
+DocsDirectory: docs/api
+
+# Target format (always use wiki for markdown for VSCode compatibility)
+TargetProfile: wiki
+
+# Project name shown in documentation
+ProjectName: [PROJECT_NAME]
+
+# Types of documentation to generate
+# Options: Files, ToC, Index, Topics, CheatSheet
+GenerateDocs: Files, ToC, Index, Topics, CheatSheet
+
+# ============================================================
+# EXCLUDE PATTERNS
+# ============================================================
+
+# Exclude dependencies, assemblies and examples
+IgnoreFiles:
+  deps/*
