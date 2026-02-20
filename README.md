@@ -101,5 +101,13 @@ This is a living document.
 
 ---
 
+## License
+
+[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](LICENSE)
+
+You are free to use, share, and adapt this guide, provided you give attribution and distribute any derivative works under the same license.
+
+---
+
 **Status:** Early draft - Reference and Explanation sections in progress
 **Last Updated:** 2026-02-15
