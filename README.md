@@ -106,7 +106,4 @@ You are free to use, share, and adapt this guide, provided you give attribution 
 ---
 
 **Status:** Early draft - Reference and Explanation sections in progress
-**Last Updated:** 2026-02-15
-- Found ambiguity? Propose a clarification.
-- Found mismatch with active projects? Open an issue with examples.
-- Proposing a convention change? Include rationale and trade-offs.
+**Last Updated:** 2026-02-20
