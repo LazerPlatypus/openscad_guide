@@ -13,3 +13,7 @@ __pycache__/
 
 # openscad-docsgen cache file
 .source_hashes
+
+# OS files
+.DS_Store
+Thumbs.db
