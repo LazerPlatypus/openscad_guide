@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: openscad-new [options] <destination>
+
+Copy an OpenSCAD template into a new destination and run template setup.
+
+Options:
+  -t, --template <project|library>  Template to use (default: project)
+      --skip-setup                  Do not run scripts/setup.sh after init
+      --init-only                   Alias for --skip-setup
+  -h, --help                        Show this help
+
+Examples:
+  openscad-new ~/Code/my_part
+  openscad-new --template library ~/Code/fasteners_lib
+  openscad-new --skip-setup ~/Code/test_fixture
+EOF
+}
+
+print_step() {
+    printf '==> %s\n' "$1"
+}
+
+print_error() {
+    printf 'Error: %s\n' "$1" >&2
+}
+
+resolve_script_dir() {
+    local source="${BASH_SOURCE[0]}"
+    while [ -L "$source" ]; do
+        local dir
+        dir="$(cd -P "$(dirname "$source")" && pwd)"
+        source="$(readlink "$source")"
+        [[ "$source" != /* ]] && source="$dir/$source"
+    done
+    cd -P "$(dirname "$source")" && pwd
+}
+
+TEMPLATE_KIND="project"
+RUN_SETUP=1
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -t|--template)
+            [[ $# -ge 2 ]] || {
+                print_error "Missing value for $1"
+                usage
+                exit 1
+            }
+            TEMPLATE_KIND="$2"
+            shift 2
+            ;;
+        --skip-setup|--init-only)
+            RUN_SETUP=0
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            print_error "Unknown option: $1"
+            usage
+            exit 1
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+[[ $# -eq 1 ]] || {
+    usage
+    exit 1
+}
+
+DESTINATION_INPUT="$1"
+SCRIPT_DIR="$(resolve_script_dir)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+TEMPLATES_DIR="$REPO_ROOT/templates"
+
+case "$TEMPLATE_KIND" in
+    project)
+        TEMPLATE_DIR="$TEMPLATES_DIR/blank_project"
+        ;;
+    library)
+        TEMPLATE_DIR="$TEMPLATES_DIR/blank_library"
+        ;;
+    *)
+        print_error "Unsupported template: $TEMPLATE_KIND"
+        usage
+        exit 1
+        ;;
+esac
+
+[[ -d "$TEMPLATE_DIR" ]] || {
+    print_error "Template directory not found: $TEMPLATE_DIR"
+    exit 1
+}
+
+mkdir -p "$(dirname "$DESTINATION_INPUT")"
+DESTINATION="$(cd "$(dirname "$DESTINATION_INPUT")" && pwd)/$(basename "$DESTINATION_INPUT")"
+
+if [[ -e "$DESTINATION" ]]; then
+    print_error "Destination already exists: $DESTINATION"
+    exit 1
+fi
+
+print_step "Copying $TEMPLATE_KIND template to $DESTINATION"
+cp -R "$TEMPLATE_DIR" "$DESTINATION"
+
+print_step "Running template initialization"
+(
+    cd "$DESTINATION"
+    ./scripts/init.sh
+)
+
+if [[ $RUN_SETUP -eq 1 ]]; then
+    print_step "Running environment setup"
+    (
+        cd "$DESTINATION"
+        ./scripts/setup.sh
+    )
+fi
+
+print_step "Project ready at $DESTINATION"
+if [[ $RUN_SETUP -eq 0 ]]; then
+    printf 'Next: cd "%s" && ./scripts/setup.sh\n' "$DESTINATION"
+fi

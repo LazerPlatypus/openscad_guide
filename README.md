@@ -15,6 +15,11 @@ Opinionated conventions for writing maintainable OpenSCAD code.
 **Want the reasoning?**
 - Read [Why These Conventions](explanation/why_these_conventions.md)
 
+**Want a one-command project bootstrap?**
+- Symlink `bin/openscad-new` into your `~/bin` or other directory on `PATH`
+- Run `openscad-new /path/to/new_project`
+- Use `openscad-new --template library /path/to/new_library` for library templates
+
 ---
 
 ## What This Guide Standardizes

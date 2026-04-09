@@ -45,6 +45,24 @@ For design projects that create specific parts or assemblies.
 
 ## Quick Start
 
+### Global Launcher
+
+If you want to create projects from anywhere without referencing this repository path directly, symlink `bin/openscad-new` into a directory on your `PATH`:
+
+```bash
+ln -s /path/to/openscad_guide/bin/openscad-new ~/bin/openscad-new
+chmod +x /path/to/openscad_guide/bin/openscad-new
+```
+
+Then create a project or library from anywhere:
+
+```bash
+openscad-new ~/Code/my_new_project
+openscad-new --template library ~/Code/my_new_library
+```
+
+The launcher copies the template, runs `scripts/init.sh`, and then runs `scripts/setup.sh` unless you pass `--skip-setup`.
+
 ### Automated Setup (Recommended)
 
 #### Creating a New Project
